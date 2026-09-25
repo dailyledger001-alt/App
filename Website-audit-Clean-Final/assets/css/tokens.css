@@ -182,12 +182,12 @@ body[data-module="finance"] #app>*{min-width:0}
 .fx-link{margin-left:10px;padding:6px 2px;border:0;background:none;color:var(--accent);font:500 13px var(--font-body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 
 /* Buttons */
-.fx-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border:1px solid var(--border-hi);border-radius:12px;background:transparent;color:var(--text);font:600 14px/1 var(--font-body);text-decoration:none;cursor:pointer;transition:border-color .2s,color .2s,filter .2s}
+.fx-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border:1px solid var(--border-hi);border-radius:12px;background:transparent;color:var(--text);font:600 14px/1 var(--font-body);text-decoration:none;cursor:pointer;white-space:nowrap;transition:border-color .2s,color .2s,filter .2s}
 .fx-btn:hover{border-color:rgba(216,179,106,.6);color:var(--accent)}
 .fx-btn-primary{border-color:transparent;background:var(--accent-grad);color:#1B1508}
 .fx-btn-primary:hover{border-color:transparent;color:#1B1508;filter:brightness(1.08)}
 .fx-btn-small{min-height:34px;padding:0 14px;border-radius:10px;font-size:13px}
-.fx-textbtn{padding:8px 10px;border:0;border-radius:8px;background:none;color:var(--text-2);font:500 13px/1 var(--font-body);cursor:pointer;transition:background .2s,color .2s}
+.fx-textbtn{padding:8px 10px;border:0;border-radius:8px;background:none;color:var(--text-2);font:500 13px/1 var(--font-body);cursor:pointer;white-space:nowrap;transition:background .2s,color .2s}
 .fx-textbtn:hover{background:rgba(255,255,255,.06);color:var(--text)}
 .fx-textbtn.is-danger:hover{background:rgba(240,113,107,.12);color:var(--expense)}
 .fx-btn:focus-visible,.fx-textbtn:focus-visible,.fx-iconbtn:focus-visible,.fx-seg button:focus-visible,.fx-link:focus-visible,.donut-filter:focus-visible,.fx-details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -264,9 +264,9 @@ body[data-module="finance"] #app>*{min-width:0}
 .fx-row-main small{color:var(--text-2);font-size:12.5px}
 .fx-amt{grid-area:amt;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right;color:var(--text)}
 .fx-amt.is-in{color:var(--income)}
-.fx-row-actions{grid-area:act;display:flex;align-items:center;justify-content:flex-end;gap:2px;min-width:0}
+.fx-row-actions{grid-area:act;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:4px 2px;min-width:0}
 .fx-row-actions:empty{display:none}
-.fx-row-bill{grid-template-columns:minmax(0,1fr) 112px 92px 118px;grid-template-areas:"main amt chip act"}
+.fx-row-bill{grid-template-columns:minmax(0,1fr) 112px 92px minmax(118px,max-content);grid-template-areas:"main amt chip act"}
 .fx-row-bill .fx-chip{grid-area:chip;justify-self:start}
 .fx-row-budget{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"wide act"}
 .fx-row-wide{grid-area:wide;min-width:0}
@@ -356,7 +356,7 @@ body[data-module="finance"] .modal-card .btn-primary{border-color:transparent;ba
   .fx-amt{min-width:0}
   .fx-row-actions{justify-content:flex-end}
   .fx-row-actions .fx-textbtn:last-child{margin-right:-8px}
-  .fx-row-bill{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"main amt" "chip act"}
+  .fx-row-bill{grid-template-columns:minmax(0,1fr) max-content;grid-template-areas:"main amt" "chip act"}
   .fx-row-budget{grid-template-columns:1fr;grid-template-areas:"wide" "act"}
   .fx-row-budget .fx-row-actions{margin-top:-2px}
   .fx-card-head .fx-filters{width:100%}
@@ -917,3 +917,39 @@ body[data-module="reports"] #app{display:grid;gap:18px;align-content:start;min-w
   body[data-page="monthly-report"] .mr-balance,body[data-page="monthly-report"] .mr-balance>div+div,body[data-page="monthly-report"] .mr-metrics,body[data-page="monthly-report"] .mr-table th,body[data-page="monthly-report"] .mr-table td{border-color:#d7d7d7}body[data-page="monthly-report"] .mr-metrics{background:#d7d7d7}body[data-page="monthly-report"] .mr-metrics>div,body[data-page="monthly-report"] .mr-table th{background:#f7f7f7}body[data-page="monthly-report"] .mr-table td:nth-child(3){color:#111}body[data-page="monthly-report"] .mr-tag{background:#ece9df;color:#4d5938}
   body[data-page="monthly-report"] .mr-table tr{break-inside:avoid}body[data-page="monthly-report"] .mr-foot{break-inside:avoid}
 }
+
+/* ===== Colorful theme pass — vivid per-section and per-item colors ===== */
+:root[data-theme="dark"]{--v-purple:#8B7CFF;--v-teal:#22D3C7;--v-pink:#F2617A;--v-blue:#4F9DFF;--v-amber:#F0A83B;--v-green:#34D399;--v-orchid:#C77DFF}
+:root[data-theme="light"]{--v-purple:#7A63E6;--v-teal:#0FA394;--v-pink:#D94E68;--v-blue:#2E7BD6;--v-amber:#C9812B;--v-green:#1FA97A;--v-orchid:#A15FE0}
+
+/* Give every module/page its own accent instead of one gold for the whole app */
+body[data-module="dashboard"]{--module-accent:var(--v-amber)}
+body[data-module="finance"]{--module-accent:var(--v-green)}
+body[data-module="tasks"]{--module-accent:var(--v-purple)}
+body[data-module="fitness"]{--module-accent:var(--v-pink)}
+body[data-module="meals"]{--module-accent:var(--v-blue)}
+body[data-module="life"]{--module-accent:var(--v-teal)}
+body[data-module="reports"]{--module-accent:var(--v-orchid)}
+
+/* Habit consistency ring, top of Habit Tracker */
+.habit-score{background:conic-gradient(var(--v-teal) var(--score),color-mix(in srgb,var(--v-teal) 12%,transparent) 0)!important;box-shadow:inset 0 0 0 11px var(--panel-2),0 12px 32px rgba(0,0,0,.25)}
+
+/* Each habit card gets its own color instead of every checkmark being gold */
+.hb-card{--hb-color:var(--v-amber)}
+.hb-card.hb-accent-1{--hb-color:var(--v-purple)}
+.hb-card.hb-accent-2{--hb-color:var(--v-teal)}
+.hb-card.hb-accent-3{--hb-color:var(--v-pink)}
+.hb-card.hb-accent-4{--hb-color:var(--v-blue)}
+.hb-card.hb-accent-5{--hb-color:var(--v-green)}
+.hb-day.is-done .hb-mark{border-color:var(--hb-color)!important;background:var(--hb-color)!important}
+.hb-day.is-now{border-color:color-mix(in srgb,var(--hb-color) 70%,transparent)!important;background:color-mix(in srgb,var(--hb-color) 8%,transparent)!important}
+.hb-streak{color:var(--hb-color)!important}
+
+/* Task priority: distinct vivid colors instead of gold/olive for everything */
+.priority-dot.high,.task-card.priority-high:before{background:var(--v-pink)!important}
+.priority-dot.medium,.task-card.priority-medium:before{background:var(--v-amber)!important}
+.priority-dot.low,.task-card.priority-low:before{background:var(--v-green)!important}
+.task-card.priority-low:before{background:var(--v-green)!important}
+
+/* Bill/finance status chips: keep paid=accent, but make pending/overdue read clearly */
+.fx-chip.is-overdue{color:var(--v-pink)!important;background:color-mix(in srgb,var(--v-pink) 15%,transparent)!important}
