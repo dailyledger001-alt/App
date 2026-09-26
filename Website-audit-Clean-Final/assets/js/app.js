@@ -48,7 +48,8 @@
     fitness:{label:'Fitness Planner',icon:icon('fitness'),href:'#/fitness-planner/train'},
     meals:{label:'Meals & Grocery',icon:icon('meals'),href:'#/meals-grocery/meal-planner'},
     life:{label:'Life Planner',icon:icon('life'),href:'#/life-planner/goal-tracker'},
-    reports:{label:'Monthly Report',icon:icon('report'),href:'#/life-planner/monthly-report'}
+    reports:{label:'Monthly Report',icon:icon('report'),href:'#/life-planner/monthly-report'},
+settings:{label:'Settings',icon:'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>',href:routeByPage.setup}
   };
   const tabs={
     finance:[['finance-annual','Overview',routeByPage['finance-annual']],['finance-setup','Setup',routeByPage['finance-setup']],['finance-log','Transactions',routeByPage['finance-log']],['finance-calculator','Calculator',routeByPage['finance-calculator']]],
@@ -120,23 +121,80 @@
 
   function initTheme(){document.documentElement.dataset.theme='dark';const settings=S.getItem('lp_settings',{});if(settings.theme!=='dark'){settings.theme='dark';S.setItem('lp_settings',settings)}}
   function renderRoute(){page=routes[location.hash.slice(1)]||'home';body.dataset.page=page;body.dataset.module=currentModule();destroyCharts();renderShell();renderPage();if(!startupPickerShown)showStartPicker()}
-  function currentModule(){if(['home','setup'].includes(page))return'dashboard';if(page==='monthly-report')return'reports';if(page.startsWith('finance'))return'finance';if(page.startsWith('tasks'))return'tasks';if(['habits','journal'].includes(page))return'tasks';if(['workout-setup','workout-plan','weight'].includes(page))return'fitness';if(['meal-setup','meal-plan','grocery','pantry'].includes(page))return'meals';return'life'}
-  function renderShell(){
-    const mod=currentModule();const settings=S.getItem('lp_settings',{});let visible=settings.modules||Object.keys(modules).filter(k=>k!=='dashboard');if(!visible.includes('reports')){visible=[...visible,'reports'];settings.modules=visible;S.setItem('lp_settings',settings)}
-    const nav=Object.entries(modules).filter(([k])=>k==='dashboard'||visible.includes(k)).map(([k,m])=>`<a class="${k===mod?'active':''}" data-module="${k}" href="${m.href}"><span class="nav-icon">${m.icon}</span>${m.label}</a>`).join('');
+function currentModule(){
+  if(page==='setup')return'settings';
+  if(page==='home')return'dashboard';
+  if(page==='monthly-report')return'reports';
+  if(page.startsWith('finance'))return'finance';
+  if(page.startsWith('tasks'))return'tasks';
+  if(['habits','journal'].includes(page))return'tasks';
+  if(['workout-setup','workout-plan','weight'].includes(page))return'fitness';
+  if(['meal-setup','meal-plan','grocery','pantry'].includes(page))return'meals';
+  return'life';
+}
+function renderShell(){
+      const mod=currentModule();const settings=S.getItem('lp_settings',{});let visible=settings.modules||Object.keys(modules).filter(k=>k!=='dashboard');if(!visible.includes('reports')){visible=[...visible,'reports'];settings.modules=visible;S.setItem('lp_settings',settings)}
+    const nav=Object.entries(modules).filter(([k])=>k==='dashboard'||k==='settings'||visible.includes(k)).map(([k,m])=>`<a class="${k===mod?'active':''}" data-module="${k}" href="${m.href}"><span class="nav-icon">${m.icon}</span>${m.label}</a>`).join('');
     const currentTabs=tabs[mod]||[],activeFinance=['finance-budget','finance-savings'].includes(page)?'finance-setup':page,tabHtml=currentTabs.map(t=>`<a class="${t[0]===activeFinance?'active':''}" href="${t[2]}">${t[1]}</a>`).join(''),mobileTabs=currentTabs.length?`<label class="mobile-tab-wrap"><span>Page</span><select id="mobile-tabs">${currentTabs.map(t=>`<option value="${t[2]}" ${t[0]===activeFinance?'selected':''}>${t[1]}</option>`).join('')}</select></label>`:'',financeMobile='';
-    body.innerHTML=`<div class="shell"><aside class="sidebar" id="sidebar"><div class="brand">Life Planner</div><nav class="modules">${nav}</nav><div class="sidebar-foot">All data stays on this device.<br>Nothing is uploaded anywhere.</div></aside><button class="nav-scrim" id="nav-scrim" aria-label="Close navigation"></button><main class="workspace"><header class="topbar"><div><p class="eyebrow" id="eyebrow"></p><h1 id="page-title"></h1></div><div class="top-actions"><button class="icon-btn menu-btn" id="menu-btn" aria-label="Open navigation">☰</button><button class="guide-btn" id="guide-btn"><span class="guide-mark">?</span><span>Guide</span></button><div class="data-menu"><button class="icon-btn" id="data-btn" aria-label="Settings, backup and restore" title="Settings, backup and restore">↕</button><div class="data-popover hidden" id="data-pop"><a class="data-link" href="${routeByPage.setup}">Preferences</a><button id="export-btn">Export backup</button><label for="import-input">Import backup</label><input hidden id="import-input" type="file" accept="application/json"></div></div></div></header>${tabHtml?`<nav class="tabs">${tabHtml}</nav>${mobileTabs}`:''}<section id="app"></section>${financeMobile}</main></div><div class="calendar-modal" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title" hidden><button class="modal-scrim" type="button" data-edit-close aria-label="Close edit dialog"></button><div class="modal-card"><div class="modal-head"><div><span class="section-kicker">Edit saved item</span><h2 id="edit-modal-title">Update details</h2></div><button class="icon-btn" type="button" data-edit-close aria-label="Close">×</button></div><form id="edit-form"><div class="form-grid" id="edit-fields"></div><div class="form-actions"><button class="btn btn-primary">Save changes</button><button class="btn btn-ghost" type="button" data-edit-close>Cancel</button></div></form></div></div>${guideHtml()}`;
+    body.innerHTML=`<div class="shell"><aside class="sidebar" id="sidebar"><div class="brand">Life Planner</div><nav class="modules">${nav}</nav><div class="sidebar-foot">All data stays on this device.<br>Nothing is uploaded anywhere.</div></aside><button class="nav-scrim" id="nav-scrim" aria-label="Close navigation"></button><main class="workspace"><header class="topbar"><div><p class="eyebrow" id="eyebrow"></p><h1 id="page-title"></h1></div><div class="top-actions"><button class="icon-btn menu-btn" id="menu-btn" aria-label="Open navigation">☰</button><button class="guide-btn" id="guide-btn"><span class="guide-mark">?</span><span>Guide</span></button> </div></header>${tabHtml?`<nav class="tabs">${tabHtml}</nav>${mobileTabs}`:''}<section id="app"></section>${financeMobile}</main></div><div class="calendar-modal" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title" hidden><button class="modal-scrim" type="button" data-edit-close aria-label="Close edit dialog"></button><div class="modal-card"><div class="modal-head"><div><span class="section-kicker">Edit saved item</span><h2 id="edit-modal-title">Update details</h2></div><button class="icon-btn" type="button" data-edit-close aria-label="Close">×</button></div><form id="edit-form"><div class="form-grid" id="edit-fields"></div><div class="form-actions"><button class="btn btn-primary">Save changes</button><button class="btn btn-ghost" type="button" data-edit-close>Cancel</button></div></form></div></div>${guideHtml()}`;
     document.querySelector('.brand').outerHTML=`<a class="brand" href="${routeByPage.home}" aria-label="Daily Ledger dashboard"><img src="assets/images/daily-ledger-logo.png" alt="Daily Ledger"></a>`;
     bindGlobal();
   }
-  function bindGlobal(){
-    const mobileTabs=document.getElementById('mobile-tabs');if(mobileTabs)mobileTabs.onchange=()=>location.hash=mobileTabs.value.slice(1);
-    document.onclick=e=>{const link=e.target.closest?.('a[href]'),next=link&&legacyRoutes[link.getAttribute('href')];if(next){e.preventDefault();location.hash=next.slice(1)}};
-    const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('nav-scrim'),menu=document.getElementById('menu-btn'),guide=document.getElementById('guide-modal');const closeMenu=()=>{sidebar.classList.remove('open');scrim.classList.remove('open');menu.setAttribute('aria-expanded','false')},closeGuide=()=>{guide.hidden=true};menu.onclick=()=>{const open=!sidebar.classList.contains('open');sidebar.classList.toggle('open',open);scrim.classList.toggle('open',open);menu.setAttribute('aria-expanded',String(open))};scrim.onclick=closeMenu;document.getElementById('guide-btn').onclick=()=>{guide.hidden=false;guide.querySelector('[data-guide-close]').focus()};guide.querySelectorAll('[data-guide-close]').forEach(b=>b.onclick=closeGuide);document.onkeydown=e=>{if(e.key==='Escape'){closeMenu();closeGuide()}};
-    const pop=document.getElementById('data-pop');document.getElementById('data-btn').onclick=()=>pop.classList.toggle('hidden');
-    document.getElementById('export-btn').onclick=()=>{const blob=new Blob([S.exportAllData()],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='life-planner-backup-'+iso(new Date())+'.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exported')};
-    document.getElementById('import-input').onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{S.importAllData(reader.result);renderRoute();toast('Backup restored')}catch(err){toast(err.message,true)}};reader.readAsText(file)};
+function bindGlobal(){
+  const mobileTabs=document.getElementById('mobile-tabs');
+  if(mobileTabs){
+    mobileTabs.onchange=()=>location.hash=mobileTabs.value.slice(1);
   }
+
+  document.onclick=e=>{
+    const link=e.target.closest?.('a[href]');
+    const next=link&&legacyRoutes[link.getAttribute('href')];
+    if(next){
+      e.preventDefault();
+      location.hash=next.slice(1);
+    }
+  };
+
+  const sidebar=document.getElementById('sidebar');
+  const scrim=document.getElementById('nav-scrim');
+  const menu=document.getElementById('menu-btn');
+  const guide=document.getElementById('guide-modal');
+
+  const closeMenu=()=>{
+    sidebar.classList.remove('open');
+    scrim.classList.remove('open');
+    menu.setAttribute('aria-expanded','false');
+  };
+
+  const closeGuide=()=>{
+    guide.hidden=true;
+  };
+
+  menu.onclick=()=>{
+    const open=!sidebar.classList.contains('open');
+    sidebar.classList.toggle('open',open);
+    scrim.classList.toggle('open',open);
+    menu.setAttribute('aria-expanded',String(open));
+  };
+
+  scrim.onclick=closeMenu;
+
+  document.getElementById('guide-btn').onclick=()=>{
+    guide.hidden=false;
+    guide.querySelector('[data-guide-close]').focus();
+  };
+
+  guide.querySelectorAll('[data-guide-close]').forEach(
+    button=>button.onclick=closeGuide
+  );
+
+  document.onkeydown=e=>{
+    if(e.key==='Escape'){
+      closeMenu();
+      closeGuide();
+    }
+  };
+}
   function renderPage(){
     destroyCharts();
     if(page==='home')renderLifeDashboard();
@@ -169,11 +227,13 @@
     startupPickerShown=true;const seenAt=Number(S.getItem('lp_start_seen_at',0));if(seenAt&&Date.now()-seenAt<86400000)return;S.setItem('lp_start_seen_at',Date.now());const choices=Object.entries(modules);body.insertAdjacentHTML('beforeend',`<div class="start-picker" role="dialog" aria-modal="true" aria-labelledby="start-picker-title"><button class="modal-scrim" type="button" data-start-close aria-label="Continue on current page"></button><section class="start-picker-card"><div class="start-picker-head"><div><span class="section-kicker">Welcome to Life Planner</span><h2 id="start-picker-title">Where do you want to start?</h2><p>Pick a workspace. You can switch sections anytime from the sidebar.</p></div><button class="icon-btn" type="button" data-start-close aria-label="Close">×</button></div><div class="start-grid">${choices.map(([key,m],i)=>`<a href="${m.href}" class="start-choice start-choice-${i}"><span>${m.icon}</span><strong>${m.label}</strong><small>${key==='dashboard'?'Your complete daily overview':key==='finance'?'Income, expenses and budgets':key==='tasks'?'Tasks, habits and your daily journal':key==='routines'?'Build better habits daily':key==='fitness'?'Workouts, progress and goals':key==='meals'?'Plan meals and manage your list':key==='reports'?'Download your completed monthly activity':'Set goals, reflect and design your life'}</small></a>`).join('')}</div><button class="btn btn-ghost start-continue" type="button" data-start-close>Continue on this page <span>→</span></button></section></div>`);const picker=document.querySelector('.start-picker'),close=()=>picker?.remove();picker.querySelectorAll('[data-start-close]').forEach(b=>b.onclick=close);picker.onkeydown=e=>{if(e.key==='Escape')close()};picker.querySelector('a')?.focus()
   }
   function renderSetup(){
-    setHead('dashboard','Preferences','Make Life Planner yours');
-    const s=S.getItem('lp_settings',{}),available=Object.entries(modules).filter(([k])=>k!=='dashboard');
+     setHead('settings','Preferences','Make Life Planner yours');
+    const s=S.getItem('lp_settings',{}),available=Object.entries(modules).filter(([k])=>k!=='dashboard'&&k!=='settings');
     const currencies=[['USD','$ · US Dollar'],['EUR','€ · Euro'],['GBP','£ · British Pound'],['INR','₹ · Indian Rupee'],['PKR','₨ · Pakistani Rupee'],['UZS','soʻm · Uzbek Som'],['CAD','C$ · Canadian Dollar'],['AUD','A$ · Australian Dollar']];
-    document.getElementById('app').innerHTML=`<div class="content-grid"><div class="panel"><div class="setup-hero"><h2>Welcome${s.name?', '+esc(s.name):''}</h2><p>Set your display preferences once. Finance automatically uses your selected currency symbol everywhere.</p></div><form id="setup-form"><div class="form-grid"><div class="field"><label for="name">Your name</label><input id="name" name="name" value="${esc(s.name||'')}" placeholder="Alex"></div><div class="field"><label for="currency">Currency</label><select id="currency" name="currency">${currencies.map(([v,label])=>`<option value="${v}" ${(s.currency||'USD')===v?'selected':''}>${label} (${v})</option>`).join('')}</select></div><div class="field"><label for="weekStart">Week starts</label><select id="weekStart" name="weekStart"><option ${s.weekStart==='Monday'?'selected':''}>Monday</option><option ${s.weekStart==='Sunday'?'selected':''}>Sunday</option></select></div><div class="field"><label for="units">Weight units</label><select id="units" name="units"><option value="kg" ${s.units!=='lb'?'selected':''}>Kilograms (kg)</option><option value="lb" ${s.units==='lb'?'selected':''}>Pounds (lb)</option></select></div><div class="field full"><label>Modules shown in navigation</label><div class="module-checks">${available.map(([k,m])=>`<label class="module-check"><input class="check" type="checkbox" name="modules" value="${k}" ${(s.modules||available.map(x=>x[0])).includes(k)?'checked':''}>${m.icon} ${m.label}</label>`).join('')}</div></div></div><div class="form-actions"><button class="btn btn-primary">Save preferences</button><a class="btn btn-ghost" href="${routeByPage.home}">Back to dashboard</a></div></form></div><div class="stack"><div class="panel"><h3>Your privacy, by design</h3><p class="panel-sub">Your planner lives in this browser’s local storage. Use the ↕ button at the top to export a backup before clearing browser data or moving devices.</p></div><div class="panel"><h3>One dashboard, every planner</h3><p class="panel-sub">Tasks, habits, meals, workouts, spending, budgets, and the next seven days update automatically from your saved data.</p><a class="btn btn-primary" href="${routeByPage.home}">Open dashboard</a></div></div></div>`;
+    document.getElementById('app').innerHTML=`<div class="content-grid"><div class="panel"><div class="setup-hero"><h2>Welcome${s.name?', '+esc(s.name):''}</h2><p>Set your display preferences once. Finance automatically uses your selected currency symbol everywhere.</p></div><form id="setup-form"><div class="form-grid"><div class="field"><label for="name">Your name</label><input id="name" name="name" value="${esc(s.name||'')}" placeholder="Alex"></div><div class="field"><label for="currency">Currency</label><select id="currency" name="currency">${currencies.map(([v,label])=>`<option value="${v}" ${(s.currency||'USD')===v?'selected':''}>${label} (${v})</option>`).join('')}</select></div><div class="field"><label for="weekStart">Week starts</label><select id="weekStart" name="weekStart"><option ${s.weekStart==='Monday'?'selected':''}>Monday</option><option ${s.weekStart==='Sunday'?'selected':''}>Sunday</option></select></div><div class="field"><label for="units">Weight units</label><select id="units" name="units"><option value="kg" ${s.units!=='lb'?'selected':''}>Kilograms (kg)</option><option value="lb" ${s.units==='lb'?'selected':''}>Pounds (lb)</option></select></div><div class="field full"><label>Modules shown in navigation</label><div class="module-checks">${available.map(([k,m])=>`<label class="module-check"><input class="check" type="checkbox" name="modules" value="${k}" ${(s.modules||available.map(x=>x[0])).includes(k)?'checked':''}>${m.icon} ${m.label}</label>`).join('')}</div></div></div><div class="form-actions"><button class="btn btn-primary">Save preferences</button><a class="btn btn-ghost" href="${routeByPage.home}">Back to dashboard</a></div></form></div><div class="stack"><div class="panel"><h3>Your privacy, by design</h3><p class="panel-sub">Your planner lives in this browser’s local storage. Export a backup before clearing browser data or moving devices.</p><div class="form-actions"><button class="btn btn-ghost" type="button" id="export-btn">Export backup</button><label class="btn btn-ghost" for="import-input">Import backup</label><input hidden id="import-input" type="file" accept="application/json,.json"></div></div><div class="panel"><h3>One dashboard, every planner</h3><p class="panel-sub">Tasks, habits, meals, workouts, spending, budgets, and the next seven days update automatically from your saved data.</p><a class="btn btn-primary" href="${routeByPage.home}">Open dashboard</a></div></div></div>`;
     const setupForm=document.getElementById('setup-form'),applyModulePreview=()=>{const selected=new Set(new FormData(setupForm).getAll('modules'));available.forEach(([key,m])=>{let link=document.querySelector(`.modules a[data-module="${key}"]`);if(selected.has(key)&&!link){link=document.createElement('a');link.dataset.module=key;link.href=m.href;link.innerHTML=`<span class="nav-icon">${m.icon}</span>${m.label}`;document.querySelector('.modules').append(link)}if(link)link.classList.toggle('hidden',!selected.has(key))})};setupForm.querySelectorAll('input[name="modules"]').forEach(input=>input.onchange=applyModulePreview);setupForm.onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target);S.setItem('lp_settings',{...s,name:fd.get('name').trim(),currency:fd.get('currency'),weekStart:fd.get('weekStart'),units:fd.get('units'),modules:fd.getAll('modules'),theme:'dark'});applyModulePreview();toast('Preferences saved')};
+document.getElementById('export-btn').onclick=()=>{const blob=new Blob([S.exportAllData()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='life-planner-backup-'+iso(new Date())+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Backup exported')};
+document.getElementById('import-input').onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{S.importAllData(reader.result);renderRoute();toast('Backup restored')}catch(err){toast(err.message,true)}};reader.readAsText(file)};
   }
   function renderVariableTasks(){
     setHead('tasks','Variable Tasks','Plan the work that moves life forward');let items=S.getItem('lp_tasks_variable',[]);if(!Array.isArray(items))items=[];
